@@ -61,15 +61,23 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   float vy = x_state(3);
 
   //check division by zero
-  if (px == 0 && py == 0) {
-      cout << "CalculateJacobian () - Error - Division by zero" << endl;
+  double threshold = 0.1;
+  if ((px < threshold && px > -threshold) || (py < threshold && py > -threshold)) {
+    Hj << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
+    return Hj;
   }
   //compute the Jacobian matrix
-    else {
-        Hj << px / sqrt(px * px + py * py), py / sqrt(px * px + py * py), 0, 0,
-              -1 * py / (px * px + py * py), px / (px * px + py * py), 0, 0,
-              py * (vx * py - vy * px) / pow(px * px + py * py, 1.5), px * (vy * px - vx * py) / pow(px * px + py * py, 1.5),
-              px / sqrt(px * px + py * py), py / sqrt (px * px + py * py);
-    }
-  return Hj;
+  else {
+    double squared = pow(px, 2) + pow(py, 2);
+    // square root of summed squares
+    double root = sqrt(squared);
+    // squared * root
+    double factor = squared * root;
+
+    /** Calculate a Jacobian */
+    Hj << px / root, py / root, 0, 0,
+          -py / squared, px / squared, 0, 0,
+          py * (vx * py - vy * px) / factor, px * (vy * px - vx * py) / factor, px / root, py / root;
+    return Hj;
+  }
 }
