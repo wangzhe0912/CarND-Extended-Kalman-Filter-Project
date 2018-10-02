@@ -26,4 +26,4 @@ This project involves the Term 2 Simulator which can be downloaded [here](https:
 4. tools.cpp: This file is relatively straight forward. You will implement functions to calculate root mean squared error and the Jacobian matrix.
 
 ## Project Results
-![alt text][image1]
+![alt text][result]
