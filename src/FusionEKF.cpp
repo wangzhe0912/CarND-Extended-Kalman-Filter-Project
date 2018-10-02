@@ -93,6 +93,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
     MatrixXd Q(4, 4);
 
+    cout << "log1: " << endl;
+
+    cout << "sensor_type_: " << measurement_pack.sensor_type_ << endl;
+    cout << "RADAR: " << MeasurementPackage::RADAR << endl;
+    cout << "LASER: " << MeasurementPackage::LASER << endl;
+
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
@@ -109,7 +115,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
       x << px, py, vx, vy;
 
-      ekf_.Init(x, P, F, Hj_, R_radar_, Q);
+      ekf_.Init(x, P, F, H_laser_, R_laser_, Hj_, R_radar_, Q);
+      cout << "log2: " << endl;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
@@ -120,13 +127,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
            0,
            0;
 
-      ekf_.Init(x, P, F, H_laser_, R_laser_, Q);
+      ekf_.Init(x, P, F, H_laser_, R_laser_, Hj_, R_radar_, Q);
+      cout << "log3: " << endl;
     }
 
     previous_timestamp_ = measurement_pack.timestamp_;
     // done initializing, no need to predict or update
 
     is_initialized_ = true;
+    cout << "log4: " << endl;
     return;
   }
 
@@ -160,8 +169,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
          0, dt_4/4*noise_ay, 0, dt_3/2*noise_ay,
          dt_3/2*noise_ax, 0, dt_2*noise_ax, 0,
          0, dt_3/2*noise_ay, 0, dt_2*noise_ay;
-
+  cout << "log5: " << endl;
   ekf_.Predict();
+  cout << "log6: " << endl;
 
   /*****************************************************************************
    *  Update
@@ -172,12 +182,17 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      * Use the sensor type to perform the update step.
      * Update the state and covariance matrices.
    */
+  cout << "sensor_type_: " << measurement_pack.sensor_type_ << endl;
+  cout << "RADAR: " << MeasurementPackage::RADAR << endl;
+  cout << "LASER: " << MeasurementPackage::LASER << endl;
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
+    cout << "log7: " << endl;
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
-  } else {
+  } else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
     // Laser updates
+    cout << "log8: " << endl;
     ekf_.Update(measurement_pack.raw_measurements_);
   }
 
